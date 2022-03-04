@@ -1,0 +1,3 @@
+[submodule "vidmod-plugins"]
+	path = vidmod-plugins
+	url = git@github.com:vidmod/vidmod-plugins.git

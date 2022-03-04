@@ -1,0 +1,8 @@
+[package]
+name = "vidmod-plugin"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[dependencies]
+vidmod-node = { version = "0.1.0", path = "../vidmod-node" }

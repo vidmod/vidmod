@@ -1,0 +1,9 @@
+[workspace]
+
+members = [
+    "vidmod-core",
+    "vidmod-node",
+    "vidmod-plugin",
+    "vidmod-plugins/vidmod-plugins-cvbs",
+    "vidmod-plugins/vidmod-plugins-core",
+]

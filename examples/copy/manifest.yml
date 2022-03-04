@@ -1,0 +1,15 @@
+nodes: 
+  input:
+    name: vidmod-plugins-core::RawFileSource
+    args:
+      kind: U8
+      file: test.in
+  output:
+    name: vidmod-plugins-core::RawFileSink
+    args:
+      kind: U8
+      file: test.out
+links: 
+  - from: [input,out]
+    to: [output,in]
+    
