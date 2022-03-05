@@ -1,0 +1,13 @@
+[package]
+name = "vidmod-macros"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version="1.0.76", features=["full","extra-traits"] }
+quote = "1.0.9"
+proc-macro2 = "1.0"

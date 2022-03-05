@@ -4,6 +4,7 @@ members = [
     "vidmod-core",
     "vidmod-node",
     "vidmod-plugin",
+    "vidmod-macros",
     "vidmod-plugins/vidmod-plugins-cvbs",
     "vidmod-plugins/vidmod-plugins-core",
 ]

@@ -20,6 +20,10 @@ lazy_static! {
             vidmod_plugins_core::plugin::RAW_FILE_SOURCE,
         );
         res.insert(
+            "vidmod-plugins-core::RawFileSource2".to_owned(),
+            vidmod_plugins_core::plugin::RAW_FILE_SOURCE2,
+        );
+        res.insert(
             "vidmod-plugins-core::RawFileSink".to_owned(),
             vidmod_plugins_core::plugin::RAW_FILE_SINK,
         );
@@ -53,8 +57,11 @@ impl Project {
                 path.to_str().unwrap().to_string(),
             );
 
-            let plugin = PLUGINS.get(&node.name).unwrap();
-            let node = (plugin.make_node)(node.args);
+            let plugin = PLUGINS
+                .get(&node.name)
+                .unwrap_or_else(|| panic!("Unknown plugin {}", node.name));
+            let mut node = (plugin.make_node)(node.args);
+            node.init();
             let id = graph.insert(node);
             node_map.insert(name, id);
         }
@@ -97,6 +104,7 @@ impl NodeGraph {
             Node::Intermediate(n) => n.get_pull_port(id, name),
             Node::Sink(_) => Err(Error::msg("Can't get pull port of output node")),
             Node::Null => Err(Error::msg("Can't get pull port of null node")),
+            Node::N2(n) => n.get_pull_port(id, name),
         }
     }
 
@@ -106,6 +114,7 @@ impl NodeGraph {
             Node::Sink(n) => n.get_push_port(id, name),
             Node::Source(_) => Err(Error::msg("Can't get push port of input node")),
             Node::Null => Err(Error::msg("Can't get push port of null node")),
+            Node::N2(n) => n.get_push_port(id, name),
         }
     }
 
@@ -117,11 +126,13 @@ impl NodeGraph {
         match &self.nodes[p1i] {
             Node::Source(n) => n.attach_push_port(p1n, p2.clone())?,
             Node::Intermediate(n) => n.attach_push_port(p1n, p2.clone())?,
+            Node::N2(n) => n.attach_push_port(p1n, p2.clone())?,
             _ => panic!(),
         }
         match &self.nodes[p2i] {
             Node::Sink(n) => n.attach_pull_port(p2n, p1.clone())?,
             Node::Intermediate(n) => n.attach_pull_port(p2n, p1.clone())?,
+            Node::N2(n) => n.attach_pull_port(p2n, p1.clone())?,
             _ => panic!(),
         }
 
@@ -151,6 +162,7 @@ impl NodeGraph {
         match &self.nodes[p.id()] {
             Node::Source(v) => v.ready_to_pull(p),
             Node::Intermediate(v) => v.ready_to_pull(p),
+            Node::N2(v) => v.ready_to_pull(p),
             _ => unimplemented!(),
         }
     }
@@ -158,6 +170,7 @@ impl NodeGraph {
         match &self.nodes[p.id()] {
             Node::Sink(v) => v.ready_to_push(p),
             Node::Intermediate(v) => v.ready_to_push(p),
+            Node::N2(v) => v.ready_to_push(p),
             _ => unimplemented!(),
         }
     }
@@ -166,6 +179,7 @@ impl NodeGraph {
         match &mut self.nodes[port.id()] {
             Node::Source(v) => v.pull_frame(port, count),
             Node::Intermediate(v) => v.pull_frame(port, count),
+            Node::N2(v) => v.pull_frame(port, count),
             _ => unimplemented!(),
         }
     }
@@ -174,6 +188,7 @@ impl NodeGraph {
         match &mut self.nodes[p.id()] {
             Node::Sink(v) => v.push_frame(p, f),
             Node::Intermediate(v) => v.push_frame(p, f),
+            Node::N2(v) => v.push_frame(p, f),
             _ => unimplemented!(),
         }
     }

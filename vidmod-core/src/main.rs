@@ -13,7 +13,7 @@ fn main() {
             exit(1);
         }
     } else {
-        println!("{} [path]",args().next().unwrap());
+        println!("{} [path]", args().next().unwrap());
         exit(1);
     }
 }
