@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use vidmod_node::{Frame, FrameKind, PullFrame, PullPort, PushFrame, PushPort, TickNode};
 
 #[derive(Debug)]
@@ -16,7 +18,7 @@ impl PullFrame for TestSource {
         assert_eq!(count, 1);
         self.n += 1;
         match port.name() {
-            "out" => Frame::U16(vec![self.n - 1]),
+            "out" => Frame::U16(VecDeque::from(vec![self.n - 1])),
             _ => panic!("Unknown port {}", port.name()),
         }
     }

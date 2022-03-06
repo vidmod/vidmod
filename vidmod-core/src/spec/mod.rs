@@ -20,10 +20,6 @@ lazy_static! {
             vidmod_plugins_core::plugin::RAW_FILE_SOURCE,
         );
         res.insert(
-            "vidmod-plugins-core::RawFileSource2".to_owned(),
-            vidmod_plugins_core::plugin::RAW_FILE_SOURCE2,
-        );
-        res.insert(
             "vidmod-plugins-core::RawFileSink".to_owned(),
             vidmod_plugins_core::plugin::RAW_FILE_SINK,
         );

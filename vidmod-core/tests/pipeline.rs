@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use common::{TestSink, TestSource};
 use vidmod_node::{Frame, PullFrame, PushFrame};
 
@@ -27,6 +29,6 @@ fn test_push() {
     let port = output.get_push_port(0, "in").unwrap();
 
     for i in 0..8 {
-        output.push_frame(&port, Frame::U16(vec![i]));
+        output.push_frame(&port, Frame::U16(VecDeque::from(vec![i])));
     }
 }

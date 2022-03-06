@@ -1,6 +1,6 @@
 nodes: 
   input:
-    name: vidmod-plugins-core::RawFileSource2
+    name: vidmod-plugins-core::RawFileSource
     args:
       kind: U8
       file: test.in
