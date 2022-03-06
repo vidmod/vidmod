@@ -3,6 +3,7 @@
 members = [
     "vidmod-core",
     "vidmod-node",
+    "vidmod-tests",
     "vidmod-plugin",
     "vidmod-macros",
     "vidmod-plugins/vidmod-plugins-cvbs",

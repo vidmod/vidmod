@@ -1,0 +1,15 @@
+#[test]
+fn {name}() {{
+    let proj_path = PathBuf::from_str("{path}").unwrap();
+    let proj_manifest = File::open(proj_path.join("manifest.yml")).unwrap();
+    let mut project = Project::load(proj_manifest, proj_path.clone());
+    while project.tick() {{}}
+
+    let mut out_file = File::open(proj_path.join("test.out")).unwrap();
+    let out_sum = std::fs::read_to_string(proj_path.join("out.sum")).unwrap();
+
+    let mut sha256 = Sha256::new();
+    std::io::copy(&mut out_file, &mut sha256).unwrap();
+    let digest = sha256.finalize();
+    assert_eq!(HEXUPPER.encode(digest.as_ref()),out_sum);
+}}
