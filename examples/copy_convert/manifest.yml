@@ -1,0 +1,43 @@
+nodes: 
+  input:
+    name: vidmod-plugins-core::RawFileSource
+    args:
+      kind: U8
+      file: test.in
+  u8tou8:
+    name: vidmod-plugins-core::Convert
+    args:
+      from: U8
+      to: U8
+  u8tou16:
+    name: vidmod-plugins-core::Convert
+    args:
+      from: U8
+      to: U16
+  u16tou16:
+    name: vidmod-plugins-core::Convert
+    args:
+      from: U16
+      to: U16
+  u16tou8:
+    name: vidmod-plugins-core::Convert
+    args:
+      from: U16
+      to: U8
+  output:
+    name: vidmod-plugins-core::RawFileSink
+    args:
+      kind: U8
+      file: test.out
+links: 
+  - from: [input,out]
+    to: [u8tou8,in]
+  - from: [u8tou8,out]
+    to: [u8tou16,in]
+  - from: [u8tou16,out]
+    to: [u16tou16,in]
+  - from: [u16tou16,out]
+    to: [u16tou8,in]
+  - from: [u16tou8,out]
+    to: [output,in]
+    

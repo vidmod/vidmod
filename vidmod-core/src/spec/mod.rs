@@ -23,6 +23,10 @@ lazy_static! {
             "vidmod-plugins-core::RawFileSink".to_owned(),
             vidmod_plugins_core::plugin::RAW_FILE_SINK,
         );
+        res.insert(
+            "vidmod-plugins-core::Convert".to_owned(),
+            vidmod_plugins_core::plugin::CONVERT,
+        );
         res
     };
 }
