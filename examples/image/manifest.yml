@@ -1,0 +1,15 @@
+nodes: 
+  input:
+    name: vidmod-plugins-core::ImageSource
+    args:
+      kind: RGBAx2
+      file: in/bell.png
+  output:
+    name: vidmod-plugins-core::ImageSink
+    args:
+      kind: RGBAx2
+      template: out/{frame}.jpg
+links: 
+  - from: [input,out]
+    to: [output,in]
+    

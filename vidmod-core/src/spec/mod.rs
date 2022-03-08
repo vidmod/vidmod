@@ -24,6 +24,14 @@ lazy_static! {
             vidmod_plugins_core::plugin::RAW_FILE_SINK,
         );
         res.insert(
+            "vidmod-plugins-core::ImageSource".to_owned(),
+            vidmod_plugins_core::plugin::IMAGE_SOURCE,
+        );
+        res.insert(
+            "vidmod-plugins-core::ImageSink".to_owned(),
+            vidmod_plugins_core::plugin::IMAGE_SINK,
+        );
+        res.insert(
             "vidmod-plugins-core::Convert".to_owned(),
             vidmod_plugins_core::plugin::CONVERT,
         );
