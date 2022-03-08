@@ -3,7 +3,7 @@ nodes:
     name: vidmod-plugins-core::RawFileSource
     args:
       kind: U8
-      file: test.in
+      file: in/test.txt
   u8tou8:
     name: vidmod-plugins-core::Convert
     args:
@@ -28,7 +28,7 @@ nodes:
     name: vidmod-plugins-core::RawFileSink
     args:
       kind: U8
-      file: test.out
+      file: out/test.txt
 links: 
   - from: [input,out]
     to: [u8tou8,in]

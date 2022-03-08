@@ -42,9 +42,6 @@ fn write_header(test_file: &mut File) {
         use std::{{fs::File, path::PathBuf, str::FromStr}};
 
         use vidmod_core::spec::Project;
-
-        use data_encoding::HEXUPPER;
-        use sha2::{{Sha256, Digest}};
 "#
     )
     .unwrap();

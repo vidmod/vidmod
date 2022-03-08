@@ -3,12 +3,12 @@ nodes:
     name: vidmod-plugins-core::RawFileSource
     args:
       kind: U8
-      file: test.in
+      file: in/test.txt
   output:
     name: vidmod-plugins-core::RawFileSink
     args:
       kind: U8
-      file: test.out
+      file: out/test.txt
 links: 
   - from: [input,out]
     to: [output,in]

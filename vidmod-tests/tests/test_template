@@ -5,11 +5,36 @@ fn {name}() {{
     let mut project = Project::load(proj_manifest, proj_path.clone());
     while project.tick() {{}}
 
-    let mut out_file = File::open(proj_path.join("test.out")).unwrap();
-    let out_sum = std::fs::read_to_string(proj_path.join("out.sum")).unwrap();
+    let expected = checksums::ops::create_hashes(&proj_path.join("out"),Default::default(),checksums::Algorithm::SHA1,None,false,1,std::io::sink(),&mut std::io::sink());
+    
+    let found = checksums::ops::read_hashes(&mut std::io::sink(),&("hashes.txt".to_string(),proj_path.join("hashes.txt"))).unwrap();
 
-    let mut sha256 = Sha256::new();
-    std::io::copy(&mut out_file, &mut sha256).unwrap();
-    let digest = sha256.finalize();
-    assert_eq!(HEXUPPER.encode(digest.as_ref()),out_sum);
+    let result = checksums::ops::compare_hashes("",expected,found).unwrap();
+    
+    let mut ok = true;
+
+    for res in result.0 {{
+        match res {{
+            checksums::ops::CompareResult::FileAdded(v)   => 
+            {{
+                println!("File added:   {{}}",v);
+                ok=false;
+            }}
+            checksums::ops::CompareResult::FileRemoved(v) => {{
+                println!("File removed: {{}}",v);
+                ok=false;
+            }}
+            checksums::ops::CompareResult::FileIgnored(v) => println!("File ignored: {{}}",v),
+        }}
+    }}
+    for res in result.1 {{
+        match res {{
+            checksums::ops::CompareFileResult::FileMatches(v) => println!("File matches: {{}}",v),
+            checksums::ops::CompareFileResult::FileDiffers{{file,was_hash,new_hash}} => {{
+                println!("File differs: {{}} ({{}}->{{}})",file,was_hash,new_hash);
+                ok=false;
+            }}
+        }}
+    }}
+    assert!(ok);
 }}
