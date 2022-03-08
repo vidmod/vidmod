@@ -4,7 +4,7 @@ use proc_macro::TokenStream;
 extern crate quote;
 
 #[proc_macro_attribute]
-pub fn node(_: TokenStream, item: TokenStream) -> TokenStream {
+pub fn node_decl(_: TokenStream, item: TokenStream) -> TokenStream {
     let input_struct = syn::parse_macro_input!(item as syn::ItemStruct);
     let ident = input_struct.ident.clone();
     let fields1 = input_struct.fields.iter();
@@ -81,22 +81,17 @@ pub fn node(_: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn node2(_: TokenStream, item: TokenStream) -> TokenStream {
-    let input_struct = syn::parse_macro_input!(item as syn::ExprStruct);
-    let fields = input_struct.fields.iter();
+pub fn node_new(_: TokenStream, item: TokenStream) -> TokenStream {
+    let mut input_fn = syn::parse_macro_input!(item as syn::ItemFn);
+    let stmts = &mut input_fn.block.stmts;
+    let stmts_len = stmts.len();
+    let struct_stmt = &mut stmts[stmts_len - 1];
+    if let syn::Stmt::Expr(syn::Expr::Struct(s)) = struct_stmt {
+        s.fields
+            .push(syn::parse_quote!(__node_node: vidmod_node::Node2::new()));
+    }
     let output = quote! {
-        Self {
-            #(#fields,)*
-            __node_node: vidmod_node::Node2::new(),
-        }
-    };
-    output.into()
-}
-
-#[proc_macro]
-pub fn node_new(_item: TokenStream) -> TokenStream {
-    let output = quote! {
-        __node_node: vidmod_node::Node2::new(),
+        #input_fn
     };
     output.into()
 }
