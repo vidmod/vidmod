@@ -2,42 +2,10 @@ use std::{collections::BTreeMap, fmt::Debug, fs::File, path::PathBuf};
 
 use anyhow::{Error, Result};
 use vidmod_node::{Frame, Node, PullPort, PushPort, TickNode};
-use vidmod_plugin::Plugin;
 
 use self::manifest::ProjectManifest;
 
 mod manifest;
-
-lazy_static! {
-    static ref PLUGINS: BTreeMap<String, Plugin> = {
-        let mut res = BTreeMap::new();
-        res.insert(
-            "vidmod-plugins-cvbs::SyncExtractor".to_owned(),
-            vidmod_plugins_cvbs::plugin::SYNC_EXTRACTOR,
-        );
-        res.insert(
-            "vidmod-plugins-core::RawFileSource".to_owned(),
-            vidmod_plugins_core::plugin::RAW_FILE_SOURCE,
-        );
-        res.insert(
-            "vidmod-plugins-core::RawFileSink".to_owned(),
-            vidmod_plugins_core::plugin::RAW_FILE_SINK,
-        );
-        res.insert(
-            "vidmod-plugins-core::ImageSource".to_owned(),
-            vidmod_plugins_core::plugin::IMAGE_SOURCE,
-        );
-        res.insert(
-            "vidmod-plugins-core::ImageSink".to_owned(),
-            vidmod_plugins_core::plugin::IMAGE_SINK,
-        );
-        res.insert(
-            "vidmod-plugins-core::Convert".to_owned(),
-            vidmod_plugins_core::plugin::CONVERT,
-        );
-        res
-    };
-}
 
 #[derive(Debug)]
 pub struct Project {
@@ -65,7 +33,7 @@ impl Project {
                 path.to_str().unwrap().to_string(),
             );
 
-            let plugin = PLUGINS
+            let plugin = vidmod_plugin::PLUGINS
                 .get(&node.name)
                 .unwrap_or_else(|| panic!("Unknown plugin {}", node.name));
             let mut node = (plugin.make_node)(node.args);

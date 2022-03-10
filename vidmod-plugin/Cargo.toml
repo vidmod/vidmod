@@ -5,4 +5,12 @@ edition = "2021"
 license = "MIT"
 
 [dependencies]
+lazy_static = "1.4.0"
+
 vidmod-node = { version = "0.1.0", path = "../vidmod-node" }
+
+vidmod-plugins-cvbs = { version = "0.1.0", path = "../vidmod-plugins/vidmod-plugins-cvbs" }
+vidmod-plugins-core = { version = "0.1.0", path = "../vidmod-plugins/vidmod-plugins-core" }
+
+[build-dependencies]
+regex = "1"
