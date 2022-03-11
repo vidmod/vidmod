@@ -8,8 +8,8 @@ use vidmod_node::Node;
 #[test]
 fn link_nodes() {
     let mut graph = NodeGraph::new();
-    let n1 = graph.insert(Node::Source(Box::new(TestSource::new())));
-    let n2 = graph.insert(Node::Sink(Box::new(TestSink::new())));
+    let n1 = graph.insert(Node::Source(Box::new(TestSource::new())), "n1".to_string());
+    let n2 = graph.insert(Node::Sink(Box::new(TestSink::new())), "n2".to_string());
 
     let p1 = graph.get_pull_port(n1, "out").unwrap();
     let p2 = graph.get_push_port(n2, "in").unwrap();
@@ -21,7 +21,7 @@ fn link_nodes() {
 #[should_panic(expected = "No such port")]
 fn pull_name() {
     let mut graph = NodeGraph::new();
-    let n1 = graph.insert(Node::Source(Box::new(TestSource::new())));
+    let n1 = graph.insert(Node::Source(Box::new(TestSource::new())), "n1".to_string());
 
     graph.get_pull_port(n1, "foo").unwrap();
 }
@@ -30,7 +30,7 @@ fn pull_name() {
 #[should_panic(expected = "No such port")]
 fn push_name() {
     let mut graph = NodeGraph::new();
-    let n1 = graph.insert(Node::Sink(Box::new(TestSink::new())));
+    let n1 = graph.insert(Node::Sink(Box::new(TestSink::new())), "n1".to_string());
 
     graph.get_push_port(n1, "foo").unwrap();
 }
@@ -39,7 +39,7 @@ fn push_name() {
 #[should_panic(expected = "Can't get pull port of output node")]
 fn pull_output() {
     let mut graph = NodeGraph::new();
-    let n1 = graph.insert(Node::Sink(Box::new(TestSink::new())));
+    let n1 = graph.insert(Node::Sink(Box::new(TestSink::new())), "n1".to_string());
 
     graph.get_pull_port(n1, "out").unwrap();
 }
@@ -48,7 +48,7 @@ fn pull_output() {
 #[should_panic(expected = "Can't get push port of input node")]
 fn push_input() {
     let mut graph = NodeGraph::new();
-    let n1 = graph.insert(Node::Source(Box::new(TestSource::new())));
+    let n1 = graph.insert(Node::Source(Box::new(TestSource::new())), "n1".to_string());
 
     graph.get_push_port(n1, "in").unwrap();
 }
@@ -56,8 +56,8 @@ fn push_input() {
 #[test]
 fn network() {
     let mut graph = NodeGraph::new();
-    let n1 = graph.insert(Node::Source(Box::new(TestSource::new())));
-    let n2 = graph.insert(Node::Sink(Box::new(TestSink::new())));
+    let n1 = graph.insert(Node::Source(Box::new(TestSource::new())), "n1".to_string());
+    let n2 = graph.insert(Node::Sink(Box::new(TestSink::new())), "n2".to_string());
 
     let p1 = graph.get_pull_port(n1, "out").unwrap();
     let p2 = graph.get_push_port(n2, "in").unwrap();

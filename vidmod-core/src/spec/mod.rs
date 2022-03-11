@@ -38,7 +38,7 @@ impl Project {
                 .unwrap_or_else(|| panic!("Unknown plugin {}", node.name));
             let mut node = (plugin.make_node)(node.args);
             node.init();
-            let id = graph.insert(node);
+            let id = graph.insert(node, name.clone());
             node_map.insert(name, id);
         }
         for link in manifest.links {
@@ -57,20 +57,23 @@ impl Project {
 
 #[derive(Debug)]
 pub struct NodeGraph {
-    nodes: Vec<Node>,
-    links: Vec<(PullPort, PushPort)>,
+    nodes:      Vec<Node>,
+    links:      Vec<(PullPort, PushPort)>,
+    node_names: Vec<String>,
 }
 
 impl NodeGraph {
     pub fn new() -> Self {
         Self {
-            nodes: Vec::new(),
-            links: Vec::new(),
+            nodes:      Vec::new(),
+            links:      Vec::new(),
+            node_names: Vec::new(),
         }
     }
 
-    pub fn insert(&mut self, node: Node) -> usize {
+    pub fn insert(&mut self, node: Node, name: String) -> usize {
         self.nodes.push(node);
+        self.node_names.push(name);
         self.nodes.len() - 1
     }
 
