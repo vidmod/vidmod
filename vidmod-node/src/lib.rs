@@ -132,6 +132,14 @@ pub trait TickNode {
     }
 }
 
+/// All nodes must be able to be finished
+pub trait FinishNode {
+    /// Signal to the node to finish processing frames
+    fn finish(&mut self) -> bool {
+        false
+    }
+}
+
 #[derive(Debug, Clone)]
 #[repr(packed)]
 #[allow(missing_docs)]
@@ -455,6 +463,18 @@ impl TickNode for Node {
     }
 }
 
+impl FinishNode for Node {
+    fn finish(&mut self) -> bool {
+        match self {
+            Node::Source(_) => false,
+            Node::Intermediate(_) => false,
+            Node::Sink(_) => false,
+            Node::Null => false,
+            Node::N2(n) => n.finish(),
+        }
+    }
+}
+
 /// Rev2 node- TODO rename
 #[derive(Debug)]
 pub struct Node2 {
@@ -619,7 +639,11 @@ pub trait Node2T: Debug {
     /// Setup for the node - register all ports here
     fn init(&mut self);
     /// Tick function for the node - signals the node to process data
+    /// Returns true if we processed any data this tick
     fn tick(&mut self) -> bool;
+    /// Finish function for the node- signals the node to wrap up
+    /// Returns true if we cannot possibly ever have more work to do
+    fn finish(&mut self) -> bool;
 }
 
 /// Macro-generated functions for a node

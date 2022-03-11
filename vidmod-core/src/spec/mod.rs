@@ -1,7 +1,12 @@
-use std::{collections::BTreeMap, fmt::Debug, fs::File, path::PathBuf};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fmt::Debug,
+    fs::File,
+    path::PathBuf,
+};
 
 use anyhow::{Error, Result};
-use vidmod_node::{Frame, Node, PullPort, PushPort, TickNode};
+use vidmod_node::{FinishNode, Frame, Node, PullPort, PushPort, TickNode};
 
 use self::manifest::ProjectManifest;
 
@@ -20,6 +25,10 @@ impl Project {
 
     pub fn tick(&mut self) -> bool {
         self.nodes.tick()
+    }
+
+    pub fn run(&mut self) {
+        self.nodes.run()
     }
 
     fn from_manifest(manifest: ProjectManifest, path: PathBuf) -> Self {
@@ -120,10 +129,24 @@ impl NodeGraph {
     }
 
     pub fn tick(&mut self) -> bool {
+        self.tick_nodes(None) || self.tick_links()
+    }
+
+    pub fn tick_nodes(&mut self, nodes: Option<&BTreeSet<usize>>) -> bool {
         let mut res = false;
-        for node in &mut self.nodes {
-            res |= node.tick()
+        for (idx, node) in self.nodes.iter_mut().enumerate() {
+            if let Some(nodes) = &nodes {
+                if !nodes.contains(&idx) {
+                    continue;
+                }
+            }
+            res |= node.tick();
         }
+        res
+    }
+
+    pub fn tick_links(&mut self) -> bool {
+        let mut res = false;
         for (pull, push) in self.links.clone() {
             let pull_count = self.pull_ready(&pull);
             let push_count = self.push_ready(&push);
@@ -135,6 +158,62 @@ impl NodeGraph {
             }
         }
         res
+    }
+
+    pub fn run(&mut self) {
+        let mut nodes = BTreeSet::from_iter(0..self.nodes.len());
+        while {
+            let mut progress = false;
+            println!("Running nodes");
+            while {
+                let mut inner_progress = false;
+                inner_progress |= self.tick_nodes(Some(&nodes));
+                inner_progress |= self.tick_links();
+                progress |= inner_progress;
+                inner_progress
+            } {
+                //println!("Inner made progress!");
+            }
+            println!("Pruning nodes");
+            let nodes_cur = nodes.clone();
+            nodes = BTreeSet::new();
+            for node in &nodes_cur {
+                for (pull, push) in &self.links {
+                    if &push.id() != node {
+                        continue;
+                    }
+                    if !nodes_cur.contains(&pull.id()) {
+                        continue;
+                    }
+                    nodes.insert(*node);
+                    break;
+                }
+            }
+            let to_prune = nodes_cur.difference(&nodes);
+            println!(
+                "Finishing nodes: {:?}",
+                to_prune
+                    .clone()
+                    .map(|x| self.node_names.get(*x).unwrap())
+                    .collect::<Vec<&String>>()
+            );
+            for node in to_prune {
+                println!("Finishing node: {:?}", self.node_names.get(*node).unwrap());
+                if !self.nodes[*node].finish() {
+                    println!("  Running to allow finish");
+                    while self.tick_nodes(Some(&nodes_cur)) || self.tick_links() {
+                        println!("   Inner made progress!");
+                    }
+                } else {
+                    println!("  Immediate finish allowed");
+                }
+                progress = true;
+            }
+            progress
+        } {
+            println!("Outer made progress!");
+        }
+        println!("Done!");
     }
 
     fn pull_ready(&self, p: &PullPort) -> usize {

@@ -7,7 +7,7 @@ fn main() {
         let proj_path = PathBuf::from_str(&args().next_back().unwrap()).unwrap();
         if let Ok(proj_manifest) = File::open(proj_path.join("manifest.yml")) {
             let mut project = Project::load(proj_manifest, proj_path);
-            while project.tick() {}
+            project.run();
         } else {
             println!("Cannot find manifest {:?}", proj_path.join("manifest.yml"));
             exit(1);

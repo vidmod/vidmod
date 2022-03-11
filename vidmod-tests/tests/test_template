@@ -3,7 +3,7 @@ fn {name}() {{
     let proj_path = PathBuf::from_str("{path}").unwrap();
     let proj_manifest = File::open(proj_path.join("manifest.yml")).unwrap();
     let mut project = Project::load(proj_manifest, proj_path.clone());
-    while project.tick() {{}}
+    project.run();
 
     let expected = checksums::ops::create_hashes(&proj_path.join("out"),Default::default(),checksums::Algorithm::SHA1,None,false,1,std::io::sink(),&mut std::io::sink());
     
