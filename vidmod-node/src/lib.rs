@@ -155,14 +155,22 @@ pub struct RGBA8 {
 pub enum Frame {
     /// A buffer of single u8s
     U8(VecDeque<u8>),
+    /// A 1D array of u8s
+    U8x1(VecDeque<ArcArray1<u8>>),
+    /// A 2D array of u8s
+    U8x2(VecDeque<ArcArray2<u8>>),
     /// A buffer of single u16s
     U16(VecDeque<u16>),
     /// A 1D array of u16s
     U16x1(VecDeque<ArcArray1<u16>>),
-    /// A 2D array of u8s
-    U8x2(VecDeque<ArcArray2<u8>>),
     /// A 2D array of u16s
     U16x2(VecDeque<ArcArray2<u16>>),
+    /// A buffer of single f32s
+    F32(VecDeque<f32>),
+    /// A 1D array of f32s
+    F32x1(VecDeque<ArcArray1<f32>>),
+    /// A 2D array of f32s
+    F32x2(VecDeque<ArcArray2<f32>>),
     /// A 2D array of RGBA8 pixels
     RGBA8x2(VecDeque<ArcArray2<RGBA8>>),
 }
@@ -171,14 +179,22 @@ pub enum Frame {
 pub enum FrameSingle {
     /// A buffer of single u8s
     U8(u8),
+    /// A 1D array of u8s
+    U8x1(ArcArray1<u8>),
+    /// A 2D array of u8s
+    U8x2(ArcArray2<u8>),
     /// A buffer of single u16s
     U16(u16),
     /// A 1D array of u16s
     U16x1(ArcArray1<u16>),
-    /// A 2D array of u8s
-    U8x2(ArcArray2<u8>),
     /// A 2D array of u16s
     U16x2(ArcArray2<u16>),
+    /// A buffer of single f32s
+    F32(f32),
+    /// A 1D array of f32s
+    F32x1(ArcArray1<f32>),
+    /// A 2D array of f32s
+    F32x2(ArcArray2<f32>),
     /// A 2D array of RGBA8 pixels
     RGBA8x2(ArcArray2<RGBA8>),
 }
@@ -188,14 +204,22 @@ pub enum FrameSingle {
 pub enum FrameKind {
     /// A buffer of single u8s
     U8,
+    /// A 1D array of u8s
+    U8x1,
+    /// A 2D array of u8s
+    U8x2,
     /// A buffer of single u16s
     U16,
     /// A 1D array of u16s
     U16x1,
-    /// A 2D array of u8s
-    U8x2,
     /// A 2D array of u16s
     U16x2,
+    /// A buffer of single f32s
+    F32,
+    /// A 1D array of f32s
+    F32x1,
+    /// A 2D array of f32s
+    F32x2,
     /// A 2D array of RGBA8 pixels
     RGBA8x2,
 }
@@ -205,6 +229,20 @@ impl FrameSingle {
     pub fn unwrap_u8(self) -> u8 {
         match self {
             FrameSingle::U8(v) => v,
+            _ => todo!("{:?}", FrameKind::from(&self)),
+        }
+    }
+    /// Unwrap the frame into its contents
+    pub fn unwrap_u8x1(self) -> ArcArray1<u8> {
+        match self {
+            FrameSingle::U8x1(v) => v,
+            _ => todo!("{:?}", FrameKind::from(&self)),
+        }
+    }
+    /// Unwrap the frame into its contents
+    pub fn unwrap_u8x2(self) -> ArcArray2<u8> {
+        match self {
+            FrameSingle::U8x2(v) => v,
             _ => todo!("{:?}", FrameKind::from(&self)),
         }
     }
@@ -223,16 +261,30 @@ impl FrameSingle {
         }
     }
     /// Unwrap the frame into its contents
-    pub fn unwrap_u8x2(self) -> ArcArray2<u8> {
+    pub fn unwrap_u16x2(self) -> ArcArray2<u16> {
         match self {
-            FrameSingle::U8x2(v) => v,
+            FrameSingle::U16x2(v) => v,
             _ => todo!("{:?}", FrameKind::from(&self)),
         }
     }
     /// Unwrap the frame into its contents
-    pub fn unwrap_u16x2(self) -> ArcArray2<u16> {
+    pub fn unwrap_f32(self) -> f32 {
         match self {
-            FrameSingle::U16x2(v) => v,
+            FrameSingle::F32(v) => v,
+            _ => todo!("{:?}", FrameKind::from(&self)),
+        }
+    }
+    /// Unwrap the frame into its contents
+    pub fn unwrap_f32x1(self) -> ArcArray1<f32> {
+        match self {
+            FrameSingle::F32x1(v) => v,
+            _ => todo!("{:?}", FrameKind::from(&self)),
+        }
+    }
+    /// Unwrap the frame into its contents
+    pub fn unwrap_f32x2(self) -> ArcArray2<f32> {
+        match self {
+            FrameSingle::F32x2(v) => v,
             _ => todo!("{:?}", FrameKind::from(&self)),
         }
     }
@@ -250,10 +302,14 @@ impl Frame {
     pub fn size(&self) -> usize {
         match self {
             Self::U8(v) => v.len(),
+            Self::U8x1(v) => v.len(),
+            Self::U8x2(v) => v.len(),
             Self::U16(v) => v.len(),
             Self::U16x1(v) => v.len(),
-            Self::U8x2(v) => v.len(),
             Self::U16x2(v) => v.len(),
+            Self::F32(v) => v.len(),
+            Self::F32x1(v) => v.len(),
+            Self::F32x2(v) => v.len(),
             Self::RGBA8x2(v) => v.len(),
         }
     }
@@ -261,10 +317,14 @@ impl Frame {
     pub fn capacity(&self) -> usize {
         match self {
             Self::U8(v) => v.capacity(),
+            Self::U8x1(v) => v.capacity(),
+            Self::U8x2(v) => v.capacity(),
             Self::U16(v) => v.capacity(),
             Self::U16x1(v) => v.capacity(),
-            Self::U8x2(v) => v.capacity(),
             Self::U16x2(v) => v.capacity(),
+            Self::F32(v) => v.capacity(),
+            Self::F32x1(v) => v.capacity(),
+            Self::F32x2(v) => v.capacity(),
             Self::RGBA8x2(v) => v.capacity(),
         }
     }
@@ -273,10 +333,14 @@ impl Frame {
         if self.capacity() >= self.size() + data.size() {
             match self {
                 Self::U8(v) => v.append(&mut data.unwrap_u8()),
+                Self::U8x1(v) => v.append(&mut data.unwrap_u8x1()),
+                Self::U8x2(v) => v.append(&mut data.unwrap_u8x2()),
                 Self::U16(v) => v.append(&mut data.unwrap_u16()),
                 Self::U16x1(v) => v.append(&mut data.unwrap_u16x1()),
-                Self::U8x2(v) => v.append(&mut data.unwrap_u8x2()),
                 Self::U16x2(v) => v.append(&mut data.unwrap_u16x2()),
+                Self::F32(v) => v.append(&mut data.unwrap_f32()),
+                Self::F32x1(v) => v.append(&mut data.unwrap_f32x1()),
+                Self::F32x2(v) => v.append(&mut data.unwrap_f32x2()),
                 Self::RGBA8x2(v) => v.append(&mut data.unwrap_rgba8x2()),
             }
             Some(())
@@ -289,10 +353,14 @@ impl Frame {
         if self.capacity() > self.size() {
             match self {
                 Self::U8(v) => v.push_back(data.unwrap_u8()),
+                Self::U8x1(v) => v.push_back(data.unwrap_u8x1()),
+                Self::U8x2(v) => v.push_back(data.unwrap_u8x2()),
                 Self::U16(v) => v.push_back(data.unwrap_u16()),
                 Self::U16x1(v) => v.push_back(data.unwrap_u16x1()),
-                Self::U8x2(v) => v.push_back(data.unwrap_u8x2()),
                 Self::U16x2(v) => v.push_back(data.unwrap_u16x2()),
+                Self::F32(v) => v.push_back(data.unwrap_f32()),
+                Self::F32x1(v) => v.push_back(data.unwrap_f32x1()),
+                Self::F32x2(v) => v.push_back(data.unwrap_f32x2()),
                 Self::RGBA8x2(v) => v.push_back(data.unwrap_rgba8x2()),
             }
             Some(())
@@ -305,14 +373,14 @@ impl Frame {
         if self.size() >= count {
             Some(match self {
                 Self::U8(v) => Frame::U8(VecDeque::from(v.make_contiguous()[..count].to_vec())),
-                Self::U16(v) => Frame::U16(VecDeque::from(v.make_contiguous()[..count].to_vec())),
-                Self::U16x1(v) => {
-                    Frame::U16x1(VecDeque::from(v.make_contiguous()[..count].to_vec()))
-                }
+                Self::U8x1(v) => Frame::U8x1(VecDeque::from(v.make_contiguous()[..count].to_vec())),
                 Self::U8x2(v) => Frame::U8x2(VecDeque::from(v.make_contiguous()[..count].to_vec())),
-                Self::U16x2(v) => {
-                    Frame::U16x2(VecDeque::from(v.make_contiguous()[..count].to_vec()))
-                }
+                Self::U16(v) => Frame::U16(VecDeque::from(v.make_contiguous()[..count].to_vec())),
+                Self::U16x1(v) => {Frame::U16x1(VecDeque::from(v.make_contiguous()[..count].to_vec()))}
+                Self::U16x2(v) => {Frame::U16x2(VecDeque::from(v.make_contiguous()[..count].to_vec()))}
+                Self::F32(v) => Frame::F32(VecDeque::from(v.make_contiguous()[..count].to_vec())),
+                Self::F32x1(v) => {Frame::F32x1(VecDeque::from(v.make_contiguous()[..count].to_vec()))}
+                Self::F32x2(v) => {Frame::F32x2(VecDeque::from(v.make_contiguous()[..count].to_vec()))}
                 Self::RGBA8x2(v) => {
                     Frame::RGBA8x2(VecDeque::from(v.make_contiguous()[..count].to_vec()))
                 }
@@ -326,10 +394,14 @@ impl Frame {
         if self.size() >= count {
             Some(match self {
                 Self::U8(v) => Frame::U8(VecDeque::from_iter(v.drain(..count))),
+                Self::U8x1(v) => Frame::U8x1(VecDeque::from_iter(v.drain(..count))),
+                Self::U8x2(v) => Frame::U8x2(VecDeque::from_iter(v.drain(..count))),
                 Self::U16(v) => Frame::U16(VecDeque::from_iter(v.drain(..count))),
                 Self::U16x1(v) => Frame::U16x1(VecDeque::from_iter(v.drain(..count))),
-                Self::U8x2(v) => Frame::U8x2(VecDeque::from_iter(v.drain(..count))),
                 Self::U16x2(v) => Frame::U16x2(VecDeque::from_iter(v.drain(..count))),
+                Self::F32(v) => Frame::F32(VecDeque::from_iter(v.drain(..count))),
+                Self::F32x1(v) => Frame::F32x1(VecDeque::from_iter(v.drain(..count))),
+                Self::F32x2(v) => Frame::F32x2(VecDeque::from_iter(v.drain(..count))),
                 Self::RGBA8x2(v) => Frame::RGBA8x2(VecDeque::from_iter(v.drain(..count))),
             })
         } else {
@@ -340,10 +412,14 @@ impl Frame {
     pub fn remove_single(&mut self) -> Option<FrameSingle> {
         match self {
             Self::U8(v) => v.pop_front().map(FrameSingle::U8),
+            Self::U8x1(v) => v.pop_front().map(FrameSingle::U8x1),
+            Self::U8x2(v) => v.pop_front().map(FrameSingle::U8x2),
             Self::U16(v) => v.pop_front().map(FrameSingle::U16),
             Self::U16x1(v) => v.pop_front().map(FrameSingle::U16x1),
-            Self::U8x2(v) => v.pop_front().map(FrameSingle::U8x2),
             Self::U16x2(v) => v.pop_front().map(FrameSingle::U16x2),
+            Self::F32(v) => v.pop_front().map(FrameSingle::F32),
+            Self::F32x1(v) => v.pop_front().map(FrameSingle::F32x1),
+            Self::F32x2(v) => v.pop_front().map(FrameSingle::F32x2),
             Self::RGBA8x2(v) => v.pop_front().map(FrameSingle::RGBA8x2),
         }
     }
@@ -351,10 +427,14 @@ impl Frame {
     pub fn with_capacity(kind: FrameKind, capacity: usize) -> Self {
         match kind {
             FrameKind::U8 => Self::U8(VecDeque::with_capacity(capacity)),
-            FrameKind::U16 => Self::U16(VecDeque::with_capacity(capacity)),
+            FrameKind::U8x1 => Self::U8x2(VecDeque::with_capacity(capacity)),
             FrameKind::U8x2 => Self::U8x2(VecDeque::with_capacity(capacity)),
+            FrameKind::U16 => Self::U16(VecDeque::with_capacity(capacity)),
             FrameKind::U16x1 => Self::U16x1(VecDeque::with_capacity(capacity)),
             FrameKind::U16x2 => Self::U16x2(VecDeque::with_capacity(capacity)),
+            FrameKind::F32 => Self::U16(VecDeque::with_capacity(capacity)),
+            FrameKind::F32x1 => Self::U16x1(VecDeque::with_capacity(capacity)),
+            FrameKind::F32x2 => Self::U16x2(VecDeque::with_capacity(capacity)),
             FrameKind::RGBA8x2 => Self::RGBA8x2(VecDeque::with_capacity(capacity)),
         }
     }
@@ -362,6 +442,20 @@ impl Frame {
     pub fn unwrap_u8(self) -> VecDeque<u8> {
         match self {
             Frame::U8(v) => v,
+            _ => panic!("{:?}", FrameKind::from(&self)),
+        }
+    }
+    /// Unwrap the frame into its contents
+    pub fn unwrap_u8x1(self) -> VecDeque<ArcArray1<u8>> {
+        match self {
+            Frame::U8x1(v) => v,
+            _ => panic!("{:?}", FrameKind::from(&self)),
+        }
+    }
+    /// Unwrap the frame into its contents
+    pub fn unwrap_u8x2(self) -> VecDeque<ArcArray2<u8>> {
+        match self {
+            Frame::U8x2(v) => v,
             _ => panic!("{:?}", FrameKind::from(&self)),
         }
     }
@@ -380,16 +474,30 @@ impl Frame {
         }
     }
     /// Unwrap the frame into its contents
-    pub fn unwrap_u8x2(self) -> VecDeque<ArcArray2<u8>> {
+    pub fn unwrap_u16x2(self) -> VecDeque<ArcArray2<u16>> {
         match self {
-            Frame::U8x2(v) => v,
+            Frame::U16x2(v) => v,
             _ => panic!("{:?}", FrameKind::from(&self)),
         }
     }
     /// Unwrap the frame into its contents
-    pub fn unwrap_u16x2(self) -> VecDeque<ArcArray2<u16>> {
+    pub fn unwrap_f32(self) -> VecDeque<f32> {
         match self {
-            Frame::U16x2(v) => v,
+            Frame::F32(v) => v,
+            _ => panic!("{:?}", FrameKind::from(&self)),
+        }
+    }
+    /// Unwrap the frame into its contents
+    pub fn unwrap_f32x1(self) -> VecDeque<ArcArray1<f32>> {
+        match self {
+            Frame::F32x1(v) => v,
+            _ => panic!("{:?}", FrameKind::from(&self)),
+        }
+    }
+    /// Unwrap the frame into its contents
+    pub fn unwrap_f32x2(self) -> VecDeque<ArcArray2<f32>> {
+        match self {
+            Frame::F32x2(v) => v,
             _ => panic!("{:?}", FrameKind::from(&self)),
         }
     }
@@ -412,10 +520,14 @@ impl From<&Frame> for FrameKind {
     fn from(f: &Frame) -> Self {
         match f {
             Frame::U8(_) => FrameKind::U8,
+            Frame::U8x1(_) => FrameKind::U8x1,
+            Frame::U8x2(_) => FrameKind::U8x2,
             Frame::U16(_) => FrameKind::U16,
             Frame::U16x1(_) => FrameKind::U16x1,
-            Frame::U8x2(_) => FrameKind::U8x2,
             Frame::U16x2(_) => FrameKind::U16x2,
+            Frame::F32(_) => FrameKind::F32,
+            Frame::F32x1(_) => FrameKind::F32x1,
+            Frame::F32x2(_) => FrameKind::F32x2,
             Frame::RGBA8x2(_) => FrameKind::RGBA8x2,
         }
     }
@@ -425,10 +537,14 @@ impl From<&FrameSingle> for FrameKind {
     fn from(f: &FrameSingle) -> Self {
         match f {
             FrameSingle::U8(_) => FrameKind::U8,
+            FrameSingle::U8x1(_) => FrameKind::U8x1,
+            FrameSingle::U8x2(_) => FrameKind::U8x2,
             FrameSingle::U16(_) => FrameKind::U16,
             FrameSingle::U16x1(_) => FrameKind::U16x1,
-            FrameSingle::U8x2(_) => FrameKind::U8x2,
             FrameSingle::U16x2(_) => FrameKind::U16x2,
+            FrameSingle::F32(_) => FrameKind::F32,
+            FrameSingle::F32x1(_) => FrameKind::F32x1,
+            FrameSingle::F32x2(_) => FrameKind::F32x2,
             FrameSingle::RGBA8x2(_) => FrameKind::RGBA8x2,
         }
     }
@@ -438,10 +554,14 @@ impl From<&str> for FrameKind {
     fn from(f: &str) -> Self {
         match f {
             "U8" => FrameKind::U8,
-            "U16" => FrameKind::U16,
+            "U8x1" => FrameKind::U8x1,
             "U8x2" => FrameKind::U8x2,
+            "U16" => FrameKind::U16,
             "U16x1" => FrameKind::U16x1,
             "U16x2" => FrameKind::U16x2,
+            "F32" => FrameKind::F32,
+            "F32x1" => FrameKind::F32x1,
+            "F32x2" => FrameKind::F32x2,
             "RGBA8x2" => FrameKind::RGBA8x2,
             _ => unimplemented!("Frame kind {}", f),
         }
