@@ -17,7 +17,12 @@ fn main() {
     let test_data_directories = read_dir("../examples/").unwrap();
 
     for directory in test_data_directories {
-        write_test(&mut test_file, &directory.unwrap());
+        let directory = directory.unwrap();
+        let out_dir = directory.path().canonicalize().unwrap().join("out");
+        if !out_dir.exists() {
+            std::fs::create_dir(out_dir).unwrap();
+        }
+        write_test(&mut test_file, &directory);
     }
 }
 
