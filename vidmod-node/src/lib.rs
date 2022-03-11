@@ -300,6 +300,27 @@ impl Frame {
             None
         }
     }
+    /// Look a number of frames from the queue without removing
+    pub fn peek(&mut self, count: usize) -> Option<Frame> {
+        if self.size() >= count {
+            Some(match self {
+                Self::U8(v) => Frame::U8(VecDeque::from(v.make_contiguous()[..count].to_vec())),
+                Self::U16(v) => Frame::U16(VecDeque::from(v.make_contiguous()[..count].to_vec())),
+                Self::U16x1(v) => {
+                    Frame::U16x1(VecDeque::from(v.make_contiguous()[..count].to_vec()))
+                }
+                Self::U8x2(v) => Frame::U8x2(VecDeque::from(v.make_contiguous()[..count].to_vec())),
+                Self::U16x2(v) => {
+                    Frame::U16x2(VecDeque::from(v.make_contiguous()[..count].to_vec()))
+                }
+                Self::RGBA8x2(v) => {
+                    Frame::RGBA8x2(VecDeque::from(v.make_contiguous()[..count].to_vec()))
+                }
+            })
+        } else {
+            None
+        }
+    }
     /// Remove a number of frames from the queue
     pub fn remove(&mut self, count: usize) -> Option<Frame> {
         if self.size() >= count {
@@ -583,6 +604,13 @@ impl Node2 {
             panic!("No pull port: {}", name)
         }
     }
+    pub fn inbuf_peek(&mut self, name: &str, count: usize) -> Frame {
+        if let Some(frame) = self.pushports.get_mut(name) {
+            frame.peek(count).unwrap()
+        } else {
+            panic!("No pull port: {}", name)
+        }
+    }
     pub fn inbuf_get(&mut self, name: &str, count: usize) -> Frame {
         if let Some(frame) = self.pushports.get_mut(name) {
             frame.remove(count).unwrap()
@@ -677,8 +705,10 @@ pub trait Node2MT {
     fn outbuf_put(&mut self, name: &str, frame: Frame);
     /// Put a frame into the output buffer
     fn outbuf_put_single(&mut self, name: &str, frame: FrameSingle);
-    /// Get a frame from the input buffer
+    /// Get frames from the input buffer
     fn inbuf_get(&mut self, name: &str, count: usize) -> Frame;
+    /// Get frames from the input buffer without consuming
+    fn inbuf_peek(&mut self, name: &str, count: usize) -> Frame;
     /// Get a frame from the input buffer
     fn inbuf_get_single(&mut self, name: &str) -> FrameSingle;
 }

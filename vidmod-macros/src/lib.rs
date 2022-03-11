@@ -64,6 +64,9 @@ pub fn node_decl(_: TokenStream, item: TokenStream) -> TokenStream {
             fn inbuf_get(&mut self, name: &str, count: usize) -> vidmod_node::Frame {
                 self.__node_node.inbuf_get(name,count)
             }
+            fn inbuf_peek(&mut self, name: &str, count: usize) -> vidmod_node::Frame {
+                self.__node_node.inbuf_peek(name,count)
+            }
             fn inbuf_get_single(&mut self, name: &str) -> vidmod_node::FrameSingle {
                 self.__node_node.inbuf_get_single(name)
             }
