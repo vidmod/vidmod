@@ -51,7 +51,7 @@ fn main() {
                         test_file
                             .write_all(
                                 format!(
-                                    "\t\t\tlet plugin = Plugin {{ make_node: |params| Node::N2(Box::new({}::{}::{}::new(params)))}}; \n",
+                                    "\t\t\tlet plugin = Plugin {{ make_node: |params| Node(Box::new({}::{}::{}::new(params)))}}; \n",
                                     crate_name_clean, module_name, plugin_struct
                                 )
                                 .as_bytes(),

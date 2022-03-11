@@ -5,7 +5,7 @@ use std::{
     path::PathBuf,
 };
 
-use anyhow::{Error, Result};
+use anyhow::Result;
 use vidmod_node::{FinishNode, Frame, Node, PullPort, PushPort, TickNode};
 
 use self::manifest::ProjectManifest;
@@ -87,23 +87,11 @@ impl NodeGraph {
     }
 
     pub fn get_pull_port(&mut self, id: usize, name: &str) -> Result<PullPort> {
-        match &self.nodes[id] {
-            Node::Source(n) => n.get_pull_port(id, name),
-            Node::Intermediate(n) => n.get_pull_port(id, name),
-            Node::Sink(_) => Err(Error::msg("Can't get pull port of output node")),
-            Node::Null => Err(Error::msg("Can't get pull port of null node")),
-            Node::N2(n) => n.get_pull_port(id, name),
-        }
+        self.nodes[id].0.get_pull_port(id, name)
     }
 
     pub fn get_push_port(&mut self, id: usize, name: &str) -> Result<PushPort> {
-        match &self.nodes[id] {
-            Node::Intermediate(n) => n.get_push_port(id, name),
-            Node::Sink(n) => n.get_push_port(id, name),
-            Node::Source(_) => Err(Error::msg("Can't get push port of input node")),
-            Node::Null => Err(Error::msg("Can't get push port of null node")),
-            Node::N2(n) => n.get_push_port(id, name),
-        }
+        self.nodes[id].0.get_push_port(id, name)
     }
 
     pub fn add_link(&mut self, p1: PullPort, p2: PushPort) -> Result<()> {
@@ -111,18 +99,8 @@ impl NodeGraph {
         let p1n = p1.name();
         let p2i = p2.id();
         let p2n = p2.name();
-        match &self.nodes[p1i] {
-            Node::Source(n) => n.attach_push_port(p1n, p2.clone())?,
-            Node::Intermediate(n) => n.attach_push_port(p1n, p2.clone())?,
-            Node::N2(n) => n.attach_push_port(p1n, p2.clone())?,
-            _ => panic!(),
-        }
-        match &self.nodes[p2i] {
-            Node::Sink(n) => n.attach_pull_port(p2n, p1.clone())?,
-            Node::Intermediate(n) => n.attach_pull_port(p2n, p1.clone())?,
-            Node::N2(n) => n.attach_pull_port(p2n, p1.clone())?,
-            _ => panic!(),
-        }
+        self.nodes[p1i].0.attach_push_port(p1n, p2.clone())?;
+        self.nodes[p2i].0.attach_pull_port(p2n, p1.clone())?;
 
         self.links.push((p1, p2));
         Ok(())
@@ -217,38 +195,18 @@ impl NodeGraph {
     }
 
     fn pull_ready(&self, p: &PullPort) -> usize {
-        match &self.nodes[p.id()] {
-            Node::Source(v) => v.ready_to_pull(p),
-            Node::Intermediate(v) => v.ready_to_pull(p),
-            Node::N2(v) => v.ready_to_pull(p),
-            _ => unimplemented!(),
-        }
+        self.nodes[p.id()].0.ready_to_pull(p)
     }
     fn push_ready(&self, p: &PushPort) -> usize {
-        match &self.nodes[p.id()] {
-            Node::Sink(v) => v.ready_to_push(p),
-            Node::Intermediate(v) => v.ready_to_push(p),
-            Node::N2(v) => v.ready_to_push(p),
-            _ => unimplemented!(),
-        }
+        self.nodes[p.id()].0.ready_to_push(p)
     }
 
     fn pull_from(&mut self, port: &PullPort, count: usize) -> Frame {
-        match &mut self.nodes[port.id()] {
-            Node::Source(v) => v.pull_frame(port, count),
-            Node::Intermediate(v) => v.pull_frame(port, count),
-            Node::N2(v) => v.pull_frame(port, count),
-            _ => unimplemented!(),
-        }
+        self.nodes[port.id()].0.pull_frame(port, count)
     }
 
     fn push_to(&mut self, p: &PushPort, f: Frame) {
-        match &mut self.nodes[p.id()] {
-            Node::Sink(v) => v.push_frame(p, f),
-            Node::Intermediate(v) => v.push_frame(p, f),
-            Node::N2(v) => v.push_frame(p, f),
-            _ => unimplemented!(),
-        }
+        self.nodes[p.id()].0.push_frame(p, f)
     }
 }
 

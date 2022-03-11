@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 -   repo: git@github.com:AM-OperatingSystem/hooks.git
-    rev: 039df8a59c1261ea035f657e0c66a49ef4182f5b
+    rev: ab66d648103e7aca200d5e715968a34576a166e2
     hooks:
     - id: cargo-check
     - id: cargo-clippy

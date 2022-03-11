@@ -450,49 +450,29 @@ impl From<&str> for FrameKind {
 
 /// A processing node
 #[derive(Debug)]
+pub struct Node(pub Box<dyn Node2TA>);
+/*
 pub enum Node {
-    /// A source node provides frames
-    Source(Box<dyn PullFrame>),
-    /// An intermediate node transforms frames
-    Intermediate(Box<dyn PullPush>),
-    /// A sink node consumes frames
-    Sink(Box<dyn PushFrame>),
-    /// A null node does not process frames
-    Null,
     /// A generation-2 node can push or pull
     N2(Box<dyn Node2TA>),
-}
+}*/
 
 impl Node {
     /// Initialize the node
     pub fn init(&mut self) {
-        if let Node::N2(v) = self {
-            v.init()
-        }
+        self.0.init()
     }
 }
 
 impl TickNode for Node {
     fn tick(&mut self) -> bool {
-        match self {
-            Node::Source(n) => n.tick(),
-            Node::Intermediate(n) => n.tick(),
-            Node::Sink(n) => n.tick(),
-            Node::Null => false,
-            Node::N2(n) => n.tick(),
-        }
+        self.0.tick()
     }
 }
 
 impl FinishNode for Node {
     fn finish(&mut self) -> bool {
-        match self {
-            Node::Source(_) => false,
-            Node::Intermediate(_) => false,
-            Node::Sink(_) => false,
-            Node::Null => false,
-            Node::N2(n) => n.finish(),
-        }
+        self.0.finish()
     }
 }
 
