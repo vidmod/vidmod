@@ -8,4 +8,5 @@ members = [
     "vidmod-macros",
     "vidmod-plugins/vidmod-plugins-cvbs",
     "vidmod-plugins/vidmod-plugins-core",
+    "vidmod-plugins/vidmod-plugins-dsp",
 ]
