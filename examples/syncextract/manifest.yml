@@ -1,0 +1,29 @@
+nodes: 
+  input:
+    name: vidmod-plugins-core::RawFileSource
+    args:
+      kind: U16
+      file: in/cvbs.data
+  ex:
+    name: vidmod-plugins-cvbs::HSyncExtractor
+    args:
+      threshold: 11000
+      min_width: 2000
+  comb:
+    name: vidmod-plugins-cvbs::LineCombiner
+    args:
+      max_width: 4000
+      count: 525
+  output:
+    name: vidmod-plugins-core::ImageSink
+    args:
+      kind: U16x2
+      template: out/{frame}.png
+links: 
+  - from: [input,out]
+    to: [ex,in]
+  - from: [ex,out]
+    to: [comb,in]
+  - from: [comb,out]
+    to: [output,in]
+    
