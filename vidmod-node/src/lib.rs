@@ -49,81 +49,6 @@ impl PushPort {
     }
 }
 
-/// A node implementing PullPush can both pull and push
-pub trait PullPush: PullFrame + PushFrame {}
-
-impl<T> PullPush for T where T: PullFrame + PushFrame {}
-
-/// A node implementing PushFrame can accept pushed frames
-pub trait PushFrame: Debug + TickNode {
-    /// Recieve a pushed frame and prepare to process
-    fn push_frame(&mut self, port: &PushPort, frame: Frame);
-    /// Test if we have a named port
-    fn test_push_port(&self, name: &str) -> bool;
-    /// Get the kind of a named port
-    fn push_port_kind(&self, name: &str) -> FrameKind;
-    /// Get the number of frames we're prepared to receive
-    fn ready_to_push(&self, name: &PushPort) -> usize;
-
-    /// Get the push port for a given name
-    fn get_push_port(&self, id: usize, name: &str) -> Result<PushPort> {
-        if self.test_push_port(name) {
-            Ok(PushPort {
-                id,
-                name: name.to_string(),
-                kind: self.push_port_kind(name),
-            })
-        } else {
-            Err(Error::msg("No such port"))
-        }
-    }
-    /// Attach another node's pull port to the push port for a given name
-    fn attach_pull_port(&self, name: &str, port: PullPort) -> Result<()> {
-        if !self.test_push_port(name) {
-            return Err(Error::msg("No such port"));
-        }
-        if self.push_port_kind(name) != port.kind {
-            return Err(Error::msg("Port kind mismatch"));
-        }
-        Ok(())
-    }
-}
-
-/// A node implementing PullFrame can produce pulled frames
-pub trait PullFrame: Debug + TickNode {
-    /// Send a processed frame
-    fn pull_frame(&mut self, port: &PullPort, count: usize) -> Frame;
-    /// Test if we have a named port
-    fn test_pull_port(&self, name: &str) -> bool;
-    /// Get the kind of a named port
-    fn pull_port_kind(&self, name: &str) -> FrameKind;
-    /// Get the number of frames we're prepared to send
-    fn ready_to_pull(&self, name: &PullPort) -> usize;
-
-    /// Get the pull port for a given name
-    fn get_pull_port(&self, id: usize, name: &str) -> Result<PullPort> {
-        if self.test_pull_port(name) {
-            Ok(PullPort {
-                id,
-                name: name.to_string(),
-                kind: self.pull_port_kind(name),
-            })
-        } else {
-            Err(Error::msg("No such port"))
-        }
-    }
-    /// Attach another node's push port to the pull port for a given name
-    fn attach_push_port(&self, name: &str, port: PushPort) -> Result<()> {
-        if !self.test_pull_port(name) {
-            return Err(Error::msg("No such port"));
-        }
-        if self.pull_port_kind(name) != port.kind {
-            return Err(Error::msg("Port kind mismatch"));
-        }
-        Ok(())
-    }
-}
-
 /// All nodes must be able to be ticked
 pub trait TickNode {
     /// Signal to the node to process all available frames
@@ -571,11 +496,6 @@ impl From<&str> for FrameKind {
 /// A processing node
 #[derive(Debug)]
 pub struct Node(pub Box<dyn Node2TA>);
-/*
-pub enum Node {
-    /// A generation-2 node can push or pull
-    N2(Box<dyn Node2TA>),
-}*/
 
 impl Node {
     /// Initialize the node
