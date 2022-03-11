@@ -135,7 +135,7 @@ pub trait TickNode {
 #[derive(Debug, Clone)]
 #[repr(packed)]
 #[allow(missing_docs)]
-pub struct RGBA {
+pub struct RGBA8 {
     pub r: u8,
     pub g: u8,
     pub b: u8,
@@ -152,7 +152,7 @@ pub enum Frame {
     /// A 2D array of u8s
     U8x2(VecDeque<ArcArray<u8, Ix2>>),
     /// A 2D array of RGBA pixels
-    RGBAx2(VecDeque<ArcArray<RGBA, Ix2>>),
+    RGBA8x2(VecDeque<ArcArray2<RGBA8>>),
 }
 
 /// A frame is a single point of data to pass between nodes
@@ -164,7 +164,7 @@ pub enum FrameSingle {
     /// A 2D array of u8s
     U8x2(ArcArray<u8, Ix2>),
     /// A 2D array of RGBA pixels
-    RGBAx2(ArcArray<RGBA, Ix2>),
+    RGBA8x2(ArcArray2<RGBA8>),
 }
 
 /// Datatype enum for a frame
@@ -177,7 +177,7 @@ pub enum FrameKind {
     /// A 2D array of u8s
     U8x2,
     /// A 2D array of RGBA pixels
-    RGBAx2,
+    RGBA8x2,
 }
 
 impl FrameSingle {
@@ -203,9 +203,9 @@ impl FrameSingle {
         }
     }
     /// Unwrap the frame into its contents
-    pub fn unwrap_rgbax2(self) -> ArcArray2<RGBA> {
+    pub fn unwrap_rgba8x2(self) -> ArcArray2<RGBA8> {
         match self {
-            FrameSingle::RGBAx2(v) => v,
+            FrameSingle::RGBA8x2(v) => v,
             _ => todo!("{:?}", FrameKind::from(&self)),
         }
     }
@@ -218,7 +218,7 @@ impl Frame {
             Self::U8(v) => v.len(),
             Self::U16(v) => v.len(),
             Self::U8x2(v) => v.len(),
-            Self::RGBAx2(v) => v.len(),
+            Self::RGBA8x2(v) => v.len(),
         }
     }
     /// Get the capacity of the queue
@@ -227,7 +227,7 @@ impl Frame {
             Self::U8(v) => v.capacity(),
             Self::U16(v) => v.capacity(),
             Self::U8x2(v) => v.capacity(),
-            Self::RGBAx2(v) => v.capacity(),
+            Self::RGBA8x2(v) => v.capacity(),
         }
     }
     /// Add a number of frames to the queue
@@ -237,7 +237,7 @@ impl Frame {
                 Self::U8(v) => v.append(&mut data.unwrap_u8()),
                 Self::U16(v) => v.append(&mut data.unwrap_u16()),
                 Self::U8x2(v) => v.append(&mut data.unwrap_u8x2()),
-                Self::RGBAx2(v) => v.append(&mut data.unwrap_rgbax2()),
+                Self::RGBA8x2(v) => v.append(&mut data.unwrap_rgba8x2()),
             }
             Some(())
         } else {
@@ -251,7 +251,7 @@ impl Frame {
                 Self::U8(v) => v.push_back(data.unwrap_u8()),
                 Self::U16(v) => v.push_back(data.unwrap_u16()),
                 Self::U8x2(v) => v.push_back(data.unwrap_u8x2()),
-                Self::RGBAx2(v) => v.push_back(data.unwrap_rgbax2()),
+                Self::RGBA8x2(v) => v.push_back(data.unwrap_rgba8x2()),
             }
             Some(())
         } else {
@@ -265,7 +265,7 @@ impl Frame {
                 Self::U8(v) => Frame::U8(VecDeque::from_iter(v.drain(..count))),
                 Self::U16(v) => Frame::U16(VecDeque::from_iter(v.drain(..count))),
                 Self::U8x2(v) => Frame::U8x2(VecDeque::from_iter(v.drain(..count))),
-                Self::RGBAx2(v) => Frame::RGBAx2(VecDeque::from_iter(v.drain(..count))),
+                Self::RGBA8x2(v) => Frame::RGBA8x2(VecDeque::from_iter(v.drain(..count))),
             })
         } else {
             None
@@ -277,7 +277,7 @@ impl Frame {
             Self::U8(v) => v.pop_front().map(FrameSingle::U8),
             Self::U16(v) => v.pop_front().map(FrameSingle::U16),
             Self::U8x2(v) => v.pop_front().map(FrameSingle::U8x2),
-            Self::RGBAx2(v) => v.pop_front().map(FrameSingle::RGBAx2),
+            Self::RGBA8x2(v) => v.pop_front().map(FrameSingle::RGBA8x2),
         }
     }
     /// Create a new frame with a given capacity
@@ -286,7 +286,7 @@ impl Frame {
             FrameKind::U8 => Self::U8(VecDeque::with_capacity(capacity)),
             FrameKind::U16 => Self::U16(VecDeque::with_capacity(capacity)),
             FrameKind::U8x2 => Self::U8x2(VecDeque::with_capacity(capacity)),
-            FrameKind::RGBAx2 => Self::RGBAx2(VecDeque::with_capacity(capacity)),
+            FrameKind::RGBA8x2 => Self::RGBA8x2(VecDeque::with_capacity(capacity)),
         }
     }
     /// Unwrap the frame into its contents
@@ -311,9 +311,9 @@ impl Frame {
         }
     }
     /// Unwrap the frame into its contents
-    pub fn unwrap_rgbax2(self) -> VecDeque<ArcArray2<RGBA>> {
+    pub fn unwrap_rgba8x2(self) -> VecDeque<ArcArray2<RGBA8>> {
         match self {
-            Frame::RGBAx2(v) => v,
+            Frame::RGBA8x2(v) => v,
             _ => panic!("{:?}", FrameKind::from(&self)),
         }
     }
@@ -331,7 +331,7 @@ impl From<&Frame> for FrameKind {
             Frame::U8(_) => FrameKind::U8,
             Frame::U16(_) => FrameKind::U16,
             Frame::U8x2(_) => FrameKind::U8x2,
-            Frame::RGBAx2(_) => FrameKind::RGBAx2,
+            Frame::RGBA8x2(_) => FrameKind::RGBA8x2,
         }
     }
 }
@@ -342,7 +342,7 @@ impl From<&FrameSingle> for FrameKind {
             FrameSingle::U8(_) => FrameKind::U8,
             FrameSingle::U16(_) => FrameKind::U16,
             FrameSingle::U8x2(_) => FrameKind::U8x2,
-            FrameSingle::RGBAx2(_) => FrameKind::RGBAx2,
+            FrameSingle::RGBA8x2(_) => FrameKind::RGBA8x2,
         }
     }
 }
@@ -353,7 +353,7 @@ impl From<&str> for FrameKind {
             "U8" => FrameKind::U8,
             "U16" => FrameKind::U16,
             "U8x2" => FrameKind::U8x2,
-            "RGBAx2" => FrameKind::RGBAx2,
+            "RGBA8x2" => FrameKind::RGBA8x2,
             _ => unimplemented!("Frame kind {}", f),
         }
     }
