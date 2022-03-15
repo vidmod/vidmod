@@ -7,3 +7,4 @@ license = "MIT"
 [dependencies]
 anyhow = "1.0.55"
 ndarray = "0.15.4"
+vidmod-macros = { version = "0.1.0", path = "../vidmod-macros" }

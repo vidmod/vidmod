@@ -1,4 +1,6 @@
 use proc_macro::TokenStream;
+use proc_macro2::Span;
+use syn::{parse_macro_input, Ident};
 
 #[macro_use]
 extern crate quote;
@@ -95,6 +97,108 @@ pub fn node_new(_: TokenStream, item: TokenStream) -> TokenStream {
     }
     let output = quote! {
         #input_fn
+    };
+    output.into()
+}
+
+struct Args {
+    kind:   syn::Type,
+    _comma: syn::token::Comma,
+    dims:   syn::LitInt,
+}
+
+impl syn::parse::Parse for Args {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        Ok(Args {
+            kind:   input.parse()?,
+            _comma: input.parse()?,
+            dims:   input.parse()?,
+        })
+    }
+}
+
+#[proc_macro]
+pub fn unwrap_impl_frame(item: TokenStream) -> TokenStream {
+    let args = parse_macro_input!(item as Args);
+    let kind = args.kind;
+    let kind_str = quote!(#kind).to_string();
+    let kind_str_lower = kind_str.to_lowercase();
+    let kind_str_upper = kind_str.to_uppercase();
+    let err_msg = format!("Tried to unwrap {{:?}} as {}", kind_str_upper);
+    let dims = args.dims.base10_parse::<u8>().unwrap();
+    let function_name = Ident::new(
+        match dims {
+            0 => format!("unwrap_{}", kind_str_lower),
+            _ => format!("unwrap_{}x{}", kind_str_lower, dims),
+        }
+        .as_str(),
+        Span::call_site(),
+    );
+    let enum_var = Ident::new(
+        match dims {
+            0 => kind_str_upper,
+            _ => format!("{}x{}", kind_str_upper, dims),
+        }
+        .as_str(),
+        Span::call_site(),
+    );
+    let retval = match dims {
+        0 => quote!(#kind),
+        1 => quote!(ArcArray1<#kind>),
+        2 => quote!(ArcArray2<#kind>),
+        _ => todo!("Return val for dim {}", dims),
+    };
+    let output = quote! {
+        /// Unwrap the frame into its contents
+        pub fn #function_name(self) -> std::collections::VecDeque<#retval> {
+            match self {
+                Frame::#enum_var(v) => v,
+                _ => panic!(#err_msg, FrameKind::from(&self)),
+            }
+        }
+    };
+    output.into()
+}
+
+#[proc_macro]
+pub fn unwrap_impl_frame_single(item: TokenStream) -> TokenStream {
+    let args = parse_macro_input!(item as Args);
+    let kind = args.kind;
+    let kind_str = quote!(#kind).to_string();
+    let kind_str_lower = kind_str.to_lowercase();
+    let kind_str_upper = kind_str.to_uppercase();
+    let err_msg = format!("Tried to unwrap {{:?}} as {}", kind_str_upper);
+    let dims = args.dims.base10_parse::<u8>().unwrap();
+    let function_name = Ident::new(
+        match dims {
+            0 => format!("unwrap_{}", kind_str_lower),
+            _ => format!("unwrap_{}x{}", kind_str_lower, dims),
+        }
+        .as_str(),
+        Span::call_site(),
+    );
+    let enum_var = Ident::new(
+        match dims {
+            0 => kind_str_upper,
+            _ => format!("{}x{}", kind_str_upper, dims),
+        }
+        .as_str(),
+        Span::call_site(),
+    );
+    let retval = match dims {
+        0 => quote!(#kind),
+        1 => quote!(ArcArray1<#kind>),
+        2 => quote!(ArcArray2<#kind>),
+        _ => todo!("Return val for dim {}", dims),
+    };
+    let output = quote! {
+        /// Unwrap the frame into its contents
+        pub fn #function_name(self) -> #retval {
+            match self {
+                FrameSingle::#enum_var(v) => v,
+                _ => panic!(#err_msg, FrameKind::from(&self)),
+            }
+        }
     };
     output.into()
 }

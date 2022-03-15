@@ -10,6 +10,7 @@ use std::{
 
 use anyhow::{Error, Result};
 use ndarray::{ArcArray1, ArcArray2};
+use vidmod_macros::{unwrap_impl_frame, unwrap_impl_frame_single};
 
 /// A node's port to pull frames out
 #[derive(Debug, Clone)]
@@ -150,76 +151,16 @@ pub enum FrameKind {
 }
 
 impl FrameSingle {
-    /// Unwrap the frame into its contents
-    pub fn unwrap_u8(self) -> u8 {
-        match self {
-            FrameSingle::U8(v) => v,
-            _ => todo!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_u8x1(self) -> ArcArray1<u8> {
-        match self {
-            FrameSingle::U8x1(v) => v,
-            _ => todo!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_u8x2(self) -> ArcArray2<u8> {
-        match self {
-            FrameSingle::U8x2(v) => v,
-            _ => todo!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_u16(self) -> u16 {
-        match self {
-            FrameSingle::U16(v) => v,
-            _ => todo!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_u16x1(self) -> ArcArray1<u16> {
-        match self {
-            FrameSingle::U16x1(v) => v,
-            _ => todo!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_u16x2(self) -> ArcArray2<u16> {
-        match self {
-            FrameSingle::U16x2(v) => v,
-            _ => todo!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_f32(self) -> f32 {
-        match self {
-            FrameSingle::F32(v) => v,
-            _ => todo!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_f32x1(self) -> ArcArray1<f32> {
-        match self {
-            FrameSingle::F32x1(v) => v,
-            _ => todo!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_f32x2(self) -> ArcArray2<f32> {
-        match self {
-            FrameSingle::F32x2(v) => v,
-            _ => todo!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_rgba8x2(self) -> ArcArray2<RGBA8> {
-        match self {
-            FrameSingle::RGBA8x2(v) => v,
-            _ => todo!("{:?}", FrameKind::from(&self)),
-        }
-    }
+    unwrap_impl_frame_single!(u8, 0);
+    unwrap_impl_frame_single!(u8, 1);
+    unwrap_impl_frame_single!(u8, 2);
+    unwrap_impl_frame_single!(u16, 0);
+    unwrap_impl_frame_single!(u16, 1);
+    unwrap_impl_frame_single!(u16, 2);
+    unwrap_impl_frame_single!(f32, 0);
+    unwrap_impl_frame_single!(f32, 1);
+    unwrap_impl_frame_single!(f32, 2);
+    unwrap_impl_frame_single!(RGBA8, 2);
 }
 
 impl Frame {
@@ -363,76 +304,16 @@ impl Frame {
             FrameKind::RGBA8x2 => Self::RGBA8x2(VecDeque::with_capacity(capacity)),
         }
     }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_u8(self) -> VecDeque<u8> {
-        match self {
-            Frame::U8(v) => v,
-            _ => panic!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_u8x1(self) -> VecDeque<ArcArray1<u8>> {
-        match self {
-            Frame::U8x1(v) => v,
-            _ => panic!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_u8x2(self) -> VecDeque<ArcArray2<u8>> {
-        match self {
-            Frame::U8x2(v) => v,
-            _ => panic!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_u16(self) -> VecDeque<u16> {
-        match self {
-            Frame::U16(v) => v,
-            _ => panic!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_u16x1(self) -> VecDeque<ArcArray1<u16>> {
-        match self {
-            Frame::U16x1(v) => v,
-            _ => panic!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_u16x2(self) -> VecDeque<ArcArray2<u16>> {
-        match self {
-            Frame::U16x2(v) => v,
-            _ => panic!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_f32(self) -> VecDeque<f32> {
-        match self {
-            Frame::F32(v) => v,
-            _ => panic!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_f32x1(self) -> VecDeque<ArcArray1<f32>> {
-        match self {
-            Frame::F32x1(v) => v,
-            _ => panic!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_f32x2(self) -> VecDeque<ArcArray2<f32>> {
-        match self {
-            Frame::F32x2(v) => v,
-            _ => panic!("{:?}", FrameKind::from(&self)),
-        }
-    }
-    /// Unwrap the frame into its contents
-    pub fn unwrap_rgba8x2(self) -> VecDeque<ArcArray2<RGBA8>> {
-        match self {
-            Frame::RGBA8x2(v) => v,
-            _ => panic!("{:?}", FrameKind::from(&self)),
-        }
-    }
+    unwrap_impl_frame!(u8, 0);
+    unwrap_impl_frame!(u8, 1);
+    unwrap_impl_frame!(u8, 2);
+    unwrap_impl_frame!(u16, 0);
+    unwrap_impl_frame!(u16, 1);
+    unwrap_impl_frame!(u16, 2);
+    unwrap_impl_frame!(f32, 0);
+    unwrap_impl_frame!(f32, 1);
+    unwrap_impl_frame!(f32, 2);
+    unwrap_impl_frame!(RGBA8, 2);
 }
 
 impl From<ArcArray2<u8>> for Frame {
