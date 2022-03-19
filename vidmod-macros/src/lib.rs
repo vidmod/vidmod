@@ -72,6 +72,9 @@ pub fn node_decl(_: TokenStream, item: TokenStream) -> TokenStream {
             fn inbuf_get_single(&mut self, name: &str) -> vidmod_node::FrameSingle {
                 self.__node_node.inbuf_get_single(name)
             }
+            fn inbuf_get_all(&mut self, name: &str) -> vidmod_node::Frame {
+                self.__node_node.inbuf_get_all(name)
+            }
         }
 
         //Compile-time check to ensure our node implements Node2T
@@ -150,7 +153,7 @@ pub fn unwrap_impl_frame(item: TokenStream) -> TokenStream {
     };
     let output = quote! {
         /// Unwrap the frame into its contents
-        pub fn #function_name(self) -> std::collections::VecDeque<#retval> {
+        pub fn #function_name(self) -> LimVecDeque<#retval> {
             match self {
                 Frame::#enum_var(v) => v,
                 _ => panic!(#err_msg, FrameKind::from(&self)),

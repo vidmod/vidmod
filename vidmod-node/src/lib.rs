@@ -6,8 +6,10 @@
 use std::{
     collections::{BTreeMap, VecDeque},
     fmt::Debug,
+    ops::RangeBounds,
 };
 
+use all_asserts::assert_le;
 use anyhow::{Error, Result};
 use ndarray::{ArcArray1, ArcArray2};
 use vidmod_macros::{unwrap_impl_frame, unwrap_impl_frame_single};
@@ -80,25 +82,25 @@ pub struct RGBA8 {
 #[derive(Debug, Clone)]
 pub enum Frame {
     /// A buffer of single u8s
-    U8(VecDeque<u8>),
+    U8(LimVecDeque<u8>),
     /// A 1D array of u8s
-    U8x1(VecDeque<ArcArray1<u8>>),
+    U8x1(LimVecDeque<ArcArray1<u8>>),
     /// A 2D array of u8s
-    U8x2(VecDeque<ArcArray2<u8>>),
+    U8x2(LimVecDeque<ArcArray2<u8>>),
     /// A buffer of single u16s
-    U16(VecDeque<u16>),
+    U16(LimVecDeque<u16>),
     /// A 1D array of u16s
-    U16x1(VecDeque<ArcArray1<u16>>),
+    U16x1(LimVecDeque<ArcArray1<u16>>),
     /// A 2D array of u16s
-    U16x2(VecDeque<ArcArray2<u16>>),
+    U16x2(LimVecDeque<ArcArray2<u16>>),
     /// A buffer of single f32s
-    F32(VecDeque<f32>),
+    F32(LimVecDeque<f32>),
     /// A 1D array of f32s
-    F32x1(VecDeque<ArcArray1<f32>>),
+    F32x1(LimVecDeque<ArcArray1<f32>>),
     /// A 2D array of f32s
-    F32x2(VecDeque<ArcArray2<f32>>),
+    F32x2(LimVecDeque<ArcArray2<f32>>),
     /// A 2D array of RGBA8 pixels
-    RGBA8x2(VecDeque<ArcArray2<RGBA8>>),
+    RGBA8x2(LimVecDeque<ArcArray2<RGBA8>>),
 }
 
 /// A frame is a single point of data to pass between nodes
@@ -238,17 +240,33 @@ impl Frame {
     pub fn peek(&mut self, count: usize) -> Option<Frame> {
         if self.size() >= count {
             Some(match self {
-                Self::U8(v) => Frame::U8(VecDeque::from(v.make_contiguous()[..count].to_vec())),
-                Self::U8x1(v) => Frame::U8x1(VecDeque::from(v.make_contiguous()[..count].to_vec())),
-                Self::U8x2(v) => Frame::U8x2(VecDeque::from(v.make_contiguous()[..count].to_vec())),
-                Self::U16(v) => Frame::U16(VecDeque::from(v.make_contiguous()[..count].to_vec())),
-                Self::U16x1(v) => {Frame::U16x1(VecDeque::from(v.make_contiguous()[..count].to_vec()))}
-                Self::U16x2(v) => {Frame::U16x2(VecDeque::from(v.make_contiguous()[..count].to_vec()))}
-                Self::F32(v) => Frame::F32(VecDeque::from(v.make_contiguous()[..count].to_vec())),
-                Self::F32x1(v) => {Frame::F32x1(VecDeque::from(v.make_contiguous()[..count].to_vec()))}
-                Self::F32x2(v) => {Frame::F32x2(VecDeque::from(v.make_contiguous()[..count].to_vec()))}
+                Self::U8(v) => Frame::U8(LimVecDeque::from(v.make_contiguous()[..count].to_vec())),
+                Self::U8x1(v) => {
+                    Frame::U8x1(LimVecDeque::from(v.make_contiguous()[..count].to_vec()))
+                }
+                Self::U8x2(v) => {
+                    Frame::U8x2(LimVecDeque::from(v.make_contiguous()[..count].to_vec()))
+                }
+                Self::U16(v) => {
+                    Frame::U16(LimVecDeque::from(v.make_contiguous()[..count].to_vec()))
+                }
+                Self::U16x1(v) => {
+                    Frame::U16x1(LimVecDeque::from(v.make_contiguous()[..count].to_vec()))
+                }
+                Self::U16x2(v) => {
+                    Frame::U16x2(LimVecDeque::from(v.make_contiguous()[..count].to_vec()))
+                }
+                Self::F32(v) => {
+                    Frame::F32(LimVecDeque::from(v.make_contiguous()[..count].to_vec()))
+                }
+                Self::F32x1(v) => {
+                    Frame::F32x1(LimVecDeque::from(v.make_contiguous()[..count].to_vec()))
+                }
+                Self::F32x2(v) => {
+                    Frame::F32x2(LimVecDeque::from(v.make_contiguous()[..count].to_vec()))
+                }
                 Self::RGBA8x2(v) => {
-                    Frame::RGBA8x2(VecDeque::from(v.make_contiguous()[..count].to_vec()))
+                    Frame::RGBA8x2(LimVecDeque::from(v.make_contiguous()[..count].to_vec()))
                 }
             })
         } else {
@@ -259,20 +277,26 @@ impl Frame {
     pub fn remove(&mut self, count: usize) -> Option<Frame> {
         if self.size() >= count {
             Some(match self {
-                Self::U8(v) => Frame::U8(VecDeque::from_iter(v.drain(..count))),
-                Self::U8x1(v) => Frame::U8x1(VecDeque::from_iter(v.drain(..count))),
-                Self::U8x2(v) => Frame::U8x2(VecDeque::from_iter(v.drain(..count))),
-                Self::U16(v) => Frame::U16(VecDeque::from_iter(v.drain(..count))),
-                Self::U16x1(v) => Frame::U16x1(VecDeque::from_iter(v.drain(..count))),
-                Self::U16x2(v) => Frame::U16x2(VecDeque::from_iter(v.drain(..count))),
-                Self::F32(v) => Frame::F32(VecDeque::from_iter(v.drain(..count))),
-                Self::F32x1(v) => Frame::F32x1(VecDeque::from_iter(v.drain(..count))),
-                Self::F32x2(v) => Frame::F32x2(VecDeque::from_iter(v.drain(..count))),
-                Self::RGBA8x2(v) => Frame::RGBA8x2(VecDeque::from_iter(v.drain(..count))),
+                Self::U8(v) => Frame::U8(LimVecDeque::from_iter(v.drain(..count))),
+                Self::U8x1(v) => Frame::U8x1(LimVecDeque::from_iter(v.drain(..count))),
+                Self::U8x2(v) => Frame::U8x2(LimVecDeque::from_iter(v.drain(..count))),
+                Self::U16(v) => Frame::U16(LimVecDeque::from_iter(v.drain(..count))),
+                Self::U16x1(v) => Frame::U16x1(LimVecDeque::from_iter(v.drain(..count))),
+                Self::U16x2(v) => Frame::U16x2(LimVecDeque::from_iter(v.drain(..count))),
+                Self::F32(v) => Frame::F32(LimVecDeque::from_iter(v.drain(..count))),
+                Self::F32x1(v) => Frame::F32x1(LimVecDeque::from_iter(v.drain(..count))),
+                Self::F32x2(v) => Frame::F32x2(LimVecDeque::from_iter(v.drain(..count))),
+                Self::RGBA8x2(v) => Frame::RGBA8x2(LimVecDeque::from_iter(v.drain(..count))),
             })
         } else {
             None
         }
+    }
+    /// Remove all frames from the queue
+    pub fn remove_all(&mut self) -> Frame {
+        let mut new = Frame::with_capacity(FrameKind::from(self as &Frame), self.capacity());
+        std::mem::swap(&mut new, self);
+        new
     }
     /// Remove a single frame from the queue
     pub fn remove_single(&mut self) -> Option<FrameSingle> {
@@ -292,16 +316,16 @@ impl Frame {
     /// Create a new frame with a given capacity
     pub fn with_capacity(kind: FrameKind, capacity: usize) -> Self {
         match kind {
-            FrameKind::U8 => Self::U8(VecDeque::with_capacity(capacity)),
-            FrameKind::U8x1 => Self::U8x2(VecDeque::with_capacity(capacity)),
-            FrameKind::U8x2 => Self::U8x2(VecDeque::with_capacity(capacity)),
-            FrameKind::U16 => Self::U16(VecDeque::with_capacity(capacity)),
-            FrameKind::U16x1 => Self::U16x1(VecDeque::with_capacity(capacity)),
-            FrameKind::U16x2 => Self::U16x2(VecDeque::with_capacity(capacity)),
-            FrameKind::F32 => Self::U16(VecDeque::with_capacity(capacity)),
-            FrameKind::F32x1 => Self::U16x1(VecDeque::with_capacity(capacity)),
-            FrameKind::F32x2 => Self::U16x2(VecDeque::with_capacity(capacity)),
-            FrameKind::RGBA8x2 => Self::RGBA8x2(VecDeque::with_capacity(capacity)),
+            FrameKind::U8 => Self::U8(LimVecDeque::with_capacity(capacity)),
+            FrameKind::U8x1 => Self::U8x2(LimVecDeque::with_capacity(capacity)),
+            FrameKind::U8x2 => Self::U8x2(LimVecDeque::with_capacity(capacity)),
+            FrameKind::U16 => Self::U16(LimVecDeque::with_capacity(capacity)),
+            FrameKind::U16x1 => Self::U16x1(LimVecDeque::with_capacity(capacity)),
+            FrameKind::U16x2 => Self::U16x2(LimVecDeque::with_capacity(capacity)),
+            FrameKind::F32 => Self::F32(LimVecDeque::with_capacity(capacity)),
+            FrameKind::F32x1 => Self::F32x1(LimVecDeque::with_capacity(capacity)),
+            FrameKind::F32x2 => Self::F32x2(LimVecDeque::with_capacity(capacity)),
+            FrameKind::RGBA8x2 => Self::RGBA8x2(LimVecDeque::with_capacity(capacity)),
         }
     }
     unwrap_impl_frame!(u8, 0);
@@ -318,7 +342,7 @@ impl Frame {
 
 impl From<ArcArray2<u8>> for Frame {
     fn from(data: ArcArray2<u8>) -> Self {
-        Frame::U8x2(VecDeque::from(vec![data]))
+        Frame::U8x2(LimVecDeque::from(vec![data]))
     }
 }
 
@@ -519,6 +543,13 @@ impl Node2 {
             panic!("No pull port: {}", name)
         }
     }
+    pub fn inbuf_get_all(&mut self, name: &str) -> Frame {
+        if let Some(frame) = self.pushports.get_mut(name) {
+            frame.remove_all()
+        } else {
+            panic!("No pull port: {}", name)
+        }
+    }
     pub fn inbuf_get_single(&mut self, name: &str) -> FrameSingle {
         if let Some(frame) = self.pushports.get_mut(name) {
             frame.remove_single().unwrap()
@@ -542,7 +573,6 @@ impl Node2 {
         }
     }
     pub fn pull_frame(&mut self, port: &PullPort, count: usize) -> Frame {
-        assert_eq!(count, 1);
         if let Some(frame) = self.pullports.get_mut(&port.name) {
             frame.remove(count).unwrap()
         } else {
@@ -612,4 +642,101 @@ pub trait Node2MT {
     fn inbuf_peek(&mut self, name: &str, count: usize) -> Frame;
     /// Get a frame from the input buffer
     fn inbuf_get_single(&mut self, name: &str) -> FrameSingle;
+    /// Get a frame from the input buffer
+    fn inbuf_get_all(&mut self, name: &str) -> Frame;
+}
+
+/// A VecDeque wrapper that enforces a limited capacity
+#[derive(Debug, Clone)]
+pub struct LimVecDeque<T> {
+    queue:    VecDeque<T>,
+    capacity: usize,
+}
+
+impl<T> LimVecDeque<T> {
+    /// Creates an empty LimVecDeque with capacity for up to `capacity` elements.
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            queue: VecDeque::with_capacity(capacity),
+            capacity,
+        }
+    }
+    /// Removed the first element and returns it, or `None` if empty.
+    pub fn pop_front(&mut self) -> Option<T> {
+        self.queue.pop_front()
+    }
+    /// Appends an element to the back of the deque.
+    pub fn push_back(&mut self, val: T) {
+        assert_le!(self.queue.len() + 1, self.capacity);
+        self.queue.push_back(val)
+    }
+    /// Moves all elements of `other` into `self`, leaving `other` empty.
+    pub fn append(&mut self, other: &mut LimVecDeque<T>) {
+        assert_le!(self.queue.len() + other.len(), self.capacity);
+        self.queue.append(&mut other.queue)
+    }
+    /// Returns the number of elements in the deque.
+    pub fn len(&self) -> usize {
+        self.queue.len()
+    }
+    /// Returns true if the deque is empty.
+    pub fn is_empty(&self) -> bool {
+        self.queue.is_empty()
+    }
+    /// Removes the specified range from the deque in bulk, returning all removed elements as an iterator.
+    pub fn drain<R>(&mut self, range: R) -> std::collections::vec_deque::Drain<T>
+    where
+        R: RangeBounds<usize>,
+    {
+        self.queue.drain(range)
+    }
+    /// Rearranges the internal storage of this deque so it is one contiguous slice, which is then returned.
+    pub fn make_contiguous(&mut self) -> &mut [T] {
+        self.queue.make_contiguous()
+    }
+    /// Gets the maximum capacity of the deque.
+    pub fn capacity(&self) -> usize {
+        self.capacity
+    }
+    /// Returns a pair of slices which contain, in order, the contents of the deque.
+    pub fn as_slices(&self) -> (&[T], &[T]) {
+        self.queue.as_slices()
+    }
+    /// Returns a front-to-back iterator.
+    pub fn iter(&self) -> std::collections::vec_deque::Iter<T> {
+        self.queue.iter()
+    }
+}
+
+impl<T> From<Vec<T>> for LimVecDeque<T> {
+    fn from(v: Vec<T>) -> Self {
+        Self {
+            capacity: v.len(),
+            queue:    VecDeque::from(v),
+        }
+    }
+}
+
+impl<T> std::iter::FromIterator<T> for LimVecDeque<T> {
+    fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = T>,
+    {
+        let queue = VecDeque::from_iter(iter);
+        let capacity = queue.len();
+        Self { queue, capacity }
+    }
+}
+
+impl<'a, T> IntoIterator for &'a LimVecDeque<T>
+where
+    T: Clone,
+{
+    type Item = T;
+
+    type IntoIter = std::collections::vec_deque::IntoIter<T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.queue.clone().into_iter()
+    }
 }
