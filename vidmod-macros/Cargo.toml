@@ -3,6 +3,8 @@ name = "vidmod-macros"
 version = "0.1.0"
 edition = "2018"
 rust-version = "1.42"
+description = "Macros to auto-implement vidmod node functionality"
+repository = "https://github.com/vidmod/vidmod"
 license = "MIT"
 
 [lib]

@@ -3,6 +3,8 @@ name = "vidmod-plugin"
 version = "0.1.0"
 edition = "2018"
 rust-version = "1.51"
+description = "Crate allowing vidmod to automatically find and use plugins"
+repository = "https://github.com/vidmod/vidmod"
 license = "MIT"
 
 [dependencies]
