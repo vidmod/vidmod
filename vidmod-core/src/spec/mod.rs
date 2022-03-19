@@ -2,11 +2,12 @@ use std::{
     collections::{BTreeMap, BTreeSet},
     fmt::Debug,
     fs::File,
-    path::PathBuf, iter::FromIterator,
+    iter::FromIterator,
+    path::PathBuf,
 };
 
 use anyhow::Result;
-use vidmod_node::{FinishNode, Frame, Node, PullPort, PushPort, TickNode};
+use vidmod_node::{frame::Frame, FinishNode, Node, PullPort, PushPort, TickNode};
 
 use self::manifest::ProjectManifest;
 

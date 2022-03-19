@@ -21,10 +21,10 @@ pub fn node_decl(_: TokenStream, item: TokenStream) -> TokenStream {
         }
 
         impl vidmod_node::Node2MT for #ident{
-            fn register_pullport(&mut self, name:&str, kind: vidmod_node::FrameKind, buf_size: usize) {
+            fn register_pullport(&mut self, name:&str, kind: vidmod_node::frame::FrameKind, buf_size: usize) {
                 self.__node_node.register_pullport(name,kind,buf_size)
             }
-            fn register_pushport(&mut self, name:&str, kind: vidmod_node::FrameKind, buf_size: usize) {
+            fn register_pushport(&mut self, name:&str, kind: vidmod_node::frame::FrameKind, buf_size: usize) {
                 self.__node_node.register_pushport(name,kind,buf_size)
             }
             fn get_pull_port(&self, id: usize, name: &str) -> anyhow::Result<PullPort> {
@@ -45,10 +45,10 @@ pub fn node_decl(_: TokenStream, item: TokenStream) -> TokenStream {
             fn ready_to_push(&self, port: &PushPort) -> usize {
                 self.__node_node.ready_to_push(port)
             }
-            fn pull_frame(&mut self, port: &PullPort, count: usize) -> vidmod_node::Frame {
+            fn pull_frame(&mut self, port: &PullPort, count: usize) -> vidmod_node::frame::Frame {
                 self.__node_node.pull_frame(port,count)
             }
-            fn push_frame(&mut self, port: &PushPort, frame: vidmod_node::Frame) {
+            fn push_frame(&mut self, port: &PushPort, frame: vidmod_node::frame::Frame) {
                 self.__node_node.push_frame(port,frame)
             }
             fn inbuf_avail(&self, name: &str) -> usize {
@@ -57,22 +57,22 @@ pub fn node_decl(_: TokenStream, item: TokenStream) -> TokenStream {
             fn outbuf_avail(&self, name: &str) -> usize {
                 self.__node_node.outbuf_avail(name)
             }
-            fn outbuf_put(&mut self, name: &str, frame: vidmod_node::Frame) {
+            fn outbuf_put(&mut self, name: &str, frame: vidmod_node::frame::Frame) {
                 self.__node_node.outbuf_put(name,frame)
             }
-            fn outbuf_put_single(&mut self, name: &str, frame: vidmod_node::FrameSingle) {
+            fn outbuf_put_single(&mut self, name: &str, frame: vidmod_node::frame::FrameSingle) {
                 self.__node_node.outbuf_put_single(name,frame)
             }
-            fn inbuf_get(&mut self, name: &str, count: usize) -> vidmod_node::Frame {
+            fn inbuf_get(&mut self, name: &str, count: usize) -> vidmod_node::frame::Frame {
                 self.__node_node.inbuf_get(name,count)
             }
-            fn inbuf_peek(&mut self, name: &str, count: usize) -> vidmod_node::Frame {
+            fn inbuf_peek(&mut self, name: &str, count: usize) -> vidmod_node::frame::Frame {
                 self.__node_node.inbuf_peek(name,count)
             }
-            fn inbuf_get_single(&mut self, name: &str) -> vidmod_node::FrameSingle {
+            fn inbuf_get_single(&mut self, name: &str) -> vidmod_node::frame::FrameSingle {
                 self.__node_node.inbuf_get_single(name)
             }
-            fn inbuf_get_all(&mut self, name: &str) -> vidmod_node::Frame {
+            fn inbuf_get_all(&mut self, name: &str) -> vidmod_node::frame::Frame {
                 self.__node_node.inbuf_get_all(name)
             }
         }
