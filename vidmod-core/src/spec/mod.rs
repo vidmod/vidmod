@@ -2,7 +2,7 @@ use std::{
     collections::{BTreeMap, BTreeSet},
     fmt::Debug,
     fs::File,
-    path::PathBuf,
+    path::PathBuf, iter::FromIterator,
 };
 
 use anyhow::Result;

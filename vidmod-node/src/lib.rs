@@ -6,7 +6,7 @@
 use std::{
     collections::{BTreeMap, VecDeque},
     fmt::Debug,
-    ops::RangeBounds,
+    ops::RangeBounds, iter::FromIterator,
 };
 
 use all_asserts::assert_le;
