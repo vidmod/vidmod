@@ -1,5 +1,10 @@
 #[test]
 fn {name}() {{
+
+    use tracing_subscriber;
+
+    tracing_subscriber::fmt::init();
+
     let proj_path = PathBuf::from_str("{path}").unwrap();
     let proj_manifest = File::open(proj_path.join("manifest.yml")).unwrap();
     let mut project = Project::load(proj_manifest, proj_path.clone());

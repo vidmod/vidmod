@@ -9,6 +9,7 @@ extern crate quote;
 pub fn node_decl(_: TokenStream, item: TokenStream) -> TokenStream {
     let input_struct = syn::parse_macro_input!(item as syn::ItemStruct);
     let ident = input_struct.ident.clone();
+    let ident_str = format!("{}", ident);
     let fields1 = input_struct.fields.iter();
     let output = quote! {
         #[derive(Debug)]
@@ -46,9 +47,11 @@ pub fn node_decl(_: TokenStream, item: TokenStream) -> TokenStream {
                 self.__node_node.ready_to_push(port)
             }
             fn pull_frame(&mut self, port: &PullPort, count: usize) -> vidmod_node::Frame {
+                tracing::event!(tracing::Level::INFO, "{} pulling {} from {}",#ident_str,count,port.name());
                 self.__node_node.pull_frame(port,count)
             }
             fn push_frame(&mut self, port: &PushPort, frame: vidmod_node::Frame) {
+                tracing::event!(tracing::Level::INFO, "{} pushing {} to {}",#ident_str,frame.size(),port.name());
                 self.__node_node.push_frame(port,frame)
             }
             fn inbuf_avail(&self, name: &str) -> usize {
@@ -58,21 +61,26 @@ pub fn node_decl(_: TokenStream, item: TokenStream) -> TokenStream {
                 self.__node_node.outbuf_avail(name)
             }
             fn outbuf_put(&mut self, name: &str, frame: vidmod_node::Frame) {
+                tracing::event!(tracing::Level::INFO, "{} putting {} for {}",#ident_str,frame.size(),name);
                 self.__node_node.outbuf_put(name,frame)
             }
             fn outbuf_put_single(&mut self, name: &str, frame: vidmod_node::FrameSingle) {
+                tracing::event!(tracing::Level::INFO, "{} putting 1 for {}",#ident_str,name);
                 self.__node_node.outbuf_put_single(name,frame)
             }
             fn inbuf_get(&mut self, name: &str, count: usize) -> vidmod_node::Frame {
+                tracing::event!(tracing::Level::INFO, "{} getting {} from {}",#ident_str,count,name);
                 self.__node_node.inbuf_get(name,count)
             }
             fn inbuf_peek(&mut self, name: &str, count: usize) -> vidmod_node::Frame {
                 self.__node_node.inbuf_peek(name,count)
             }
             fn inbuf_get_single(&mut self, name: &str) -> vidmod_node::FrameSingle {
+                tracing::event!(tracing::Level::INFO, "{} getting 1 from {}",#ident_str,name);
                 self.__node_node.inbuf_get_single(name)
             }
             fn inbuf_get_all(&mut self, name: &str) -> vidmod_node::Frame {
+                tracing::event!(tracing::Level::INFO, "{} getting all from {}",#ident_str,name);
                 self.__node_node.inbuf_get_all(name)
             }
         }
