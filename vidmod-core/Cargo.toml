@@ -15,5 +15,3 @@ serde = { version = "1.0.136", features = ["derive"] }
 serde_yaml = "0.8.23"
 vidmod-node = { version = "0.1.0", path = "../vidmod-node" }
 vidmod-plugin = { version = "0.1.0", path = "../vidmod-plugin" }
-vidmod-plugins-cvbs = { version = "0.1.0", path = "../vidmod-plugins/vidmod-plugins-cvbs" }
-vidmod-plugins-core = { version = "0.1.0", path = "../vidmod-plugins/vidmod-plugins-core" }
